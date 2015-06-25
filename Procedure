@@ -1,0 +1,1570 @@
+;docformat = 'rst'
+;
+;This procedure generates plots of relative flux, covering factor, and optical
+;depth versus velocity from wavelength spectrum.
+;
+; :Categories:
+;    ANALYSIS
+;
+;
+; :Returns:
+;    Portable Document Field (.pdf)
+;    
+; :Params:
+;    galaxyname, required, type=string
+;      All spectra should be saved as .txt files and all fits and normalized 
+;      curves should be converted from .fits to .txt files.
+;    galaxyredshift, required, type=double
+;      Can be found via NED if not already given. 
+;    widthnv, required, type = intarr
+;      Provides the amount of wavelengths to the left and right of 0 that 
+;      the user wants to transform to velocity space, based on the NV
+;      doublets.
+;    widthovi, required, type = intarr
+;      Provides the amount of wavelengths to the left and right of 0 that
+;      the user wants to transform to velocity space, based on the OVI
+;      doublets.
+
+
+FUNCTION UVPlotFunction, velocitygasOVIR, velocitygasOVIB, relativeflux, errorOVIR, errorOVIB, $
+  ShiftedLineVelocityOVIR, Falsepoints, VerticalLines, rangespectraOVIB, $
+  indexOVIRISM, indexIntrinsic, LineVelocityOVIB, errorbarsb, errorbarsr, $
+  rangelyb, filename, LineLabel, velocitygasNVR, velocitygasNVB, $
+  errorNVR, errorNVB, ShiftedLineVelocityOVIB, LineVelocityOVIR, rangespectraNVB, $
+  errorbarslyb, LineVelocityLYB, indexLYBIntrinsicNV, indexLYBISMNV, $
+  indexLYAIntrinsicNV, indexLYAISMNV, ShiftedLineVelocityLYB,  $
+  LineVelocityLYA, indexNVISM, rangenvr, linecount, ShiftedLineVelocityNVR, $
+  LineVelocityNVR, LineVelocityNVB, indexNVRISM, indexNVRIntrinsic, ShiftedLineVelocityNVB, $
+  indexNVBISM, indexNVBIntrinsic, coveringfactorNV, errorNVCF, opticaldepthNVR, errorNVOD, $
+  errorLYA, velocitygasLYA, ShiftedLineVelocityLYA, indexOVIRIntrinsic, indexOVIBISM, $
+  indexOVIBIntrinsic, coveringfactorovi, errorovicf, opticaldepthovir, erroroviod, $
+  rangelya, indexlyaismovi, indexLYAIntrinsicOVI, velocitygaslyb, errorlyb, $
+  indexLYBISMOVI, indexlybIntrinsicOVI, odtitle, cftitle, wgasLyAU, wgasLyBU, wgasNVBU, wgasOVIBU
+  ;*****************************************
+  ;Creates a multipanel plot and saves it as a PDF.
+  ;*****************************************
+  IF rangelyb[0] gt 0 THEN BEGIN
+    CalculatedOVI = WINDOW(WINDOW_TITLE=filename + ' Properties OVI')
+    errorbarsR = errorplot(velocitygasOVIR, relativeflux, errorOVIR, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      XTITLE = 'Velocity (km/s)', $
+      YTITLE = '$Flux_{red}$', $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    IntrinsicR = errorplot(ShiftedLineVelocityOVIR, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='red', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    ISMR = errorplot(LineVelocityOVIR, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='lime green', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    text=TEXT(.5, .495, '1031.912 $\AA$', /NORMAL, FONT_SIZE = 8)
+      FOR I = MIN(indexOVIRISM), MAX(indexOVIRISM) DO BEGIN
+      label=TEXT(ShiftedLineVelocityOVIR[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsr, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    FOR I = MIN(indexOVIRIntrinsic), MAX(indexOVIRIntrinsic) DO BEGIN
+      label=TEXT(LineVelocityOVIR[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsr, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    errorbarsB = errorplot(velocitygasOVIB, relativeflux, errorOVIB, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      YTITLE = '$Flux_{blue}$', $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    IntrinsicB = errorplot(ShiftedLineVelocityOVIB, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='red', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    ISMB = errorplot(LineVelocityOVIB, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='lime green', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    text=TEXT(.5, .275,'1037.613 $\AA$', /NORMAL, FONT_SIZE = 8)
+      FOR I = MIN(indexOVIBISM), MAX(indexOVIBISM) DO BEGIN
+      label=TEXT(ShiftedLineVelocityOVIB[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsb, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    FOR I = MIN(indexOVIBIntrinsic), MAX(indexOVIRIntrinsic) DO BEGIN
+      label=TEXT(LineVelocityOVIB[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsb, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    errorbarsCF = errorplot(velocitygasOVIB, coveringfactorOVI, errorOVICF, $
+      XRANGE = [rangespectraOVIB],$
+      YRANGE = [-.5,1.3], $
+      YTITLE = cftitle, $
+      POSITION = [.15,.54,.95,.71], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    errorbarsOD = errorplot(velocitygasOVIB, ALOG10(opticaldepthOVIR), errorOVIOD , $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      YTITLE = odtitle, $
+      TITLE = filename +' Properties',$
+      POSITION = [.15,.76,.95,.93], $
+      /CURRENT, $
+      errorbar_capsize = 0, $
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    legint=TEXT(.1,.98,"--- Intrinsic", $
+      FONT_SIZE = 8, $
+      COLOR = "red")
+    legint=TEXT(.1,.96,"--- ISM", $
+      FONT_SIZE = 8, $
+      COLOR = "lime green")
+    CalculatedOVI.save, filename+' OVI plots.pdf'
+    CalculatedOVI.close
+  ENDIF
+  IF rangenvr[0] lt linecount THEN BEGIN
+    CalculatedNV = WINDOW(WINDOW_TITLE=filename + ' Properties NV')
+    errorbarsR = errorplot(velocitygasNVR, relativeflux, errorNVR, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      XTITLE = 'Velocity (km/s)', $
+      YTITLE = '$Flux_{red}$', $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    IntrinsicR = errorplot(ShiftedLineVelocityNVR, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='red', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    ISMR = errorplot(LineVelocityNVR, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='lime green', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    FOR I = MIN(indexNVRISM), MAX(indexNVRISM) DO BEGIN
+      label=TEXT(ShiftedLineVelocityNVR[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    FOR I = MIN(indexNVRIntrinsic), MAX(indexNVRIntrinsic) DO BEGIN
+      label=TEXT(LineVelocityNVR[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    text=TEXT(.5, .495, '1238.82 $\AA$', /NORMAL, FONT_SIZE = 8)
+      errorbarsB = errorplot(velocitygasNVB, relativeflux, errorNVB, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      YTITLE = '$Flux_{blue}$', $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    IntrinsicB = errorplot(ShiftedLineVelocityNVB, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='red', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    ISMB = errorplot(LineVelocityNVB, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='lime green', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    text=TEXT(.5, .275,'1242.804 $\AA$', /NORMAL, FONT_SIZE = 8)
+      FOR I = MIN(indexNVBISM), MAX(indexNVBISM) DO BEGIN
+      label=TEXT(ShiftedLineVelocityNVB[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsb, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    FOR I = MIN(indexNVBIntrinsic), MAX(indexNVBIntrinsic) DO BEGIN
+      label=TEXT(LineVelocityNVB[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsb, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    errorbarsCF = errorplot(velocitygasNVB, coveringfactorNV, errorNVCF, $
+      XRANGE = [rangespectraNVB],$
+      YRANGE = [-.5,1.3], $
+      YTITLE = cftitle, $
+      POSITION = [.15,.54,.95,.71], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    errorbarsOD = errorplot(velocitygasNVB, ALOG10(opticaldepthNVR), errorNVOD, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      YTITLE = odtitle, $
+      TITLE = filename +' Properties',$
+      POSITION = [.15,.76,.95,.93], $
+      /CURRENT, $
+      errorbar_capsize = 0, $
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    legint=TEXT(.1,.98,"--- Intrinsic", $
+      FONT_SIZE = 8, $
+      COLOR = "red")
+    legint=TEXT(.1,.96,"--- ISM", $
+      FONT_SIZE = 8, $
+      COLOR = "lime green")
+    CalculatedNV.save, filename+' NV plots.pdf', /CLOSE
+    CalculatedNV.close
+  ENDIF
+  IF rangelyb[0] gt 0 THEN BEGIN
+    OVInatural = WINDOW(WINDOW_TITLE = filename + ' OVI Natural')
+    errorbarsR = errorplot(velocitygasOVIR, relativeflux, errorOVIR, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      XTITLE = 'Velocity (km/s)', $
+      YTITLE = '$Flux_{red}$', $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    IntrinsicR = errorplot(ShiftedLineVelocityOVIR, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='red', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    ISMR = errorplot(LineVelocityOVIR, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='lime green', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    text=TEXT(.5, .275, '1037.613 $\AA$', /NORMAL, FONT_SIZE = 8)
+      FOR I = MIN(indexOVIRISM), MAX(indexOVIRISM) DO BEGIN
+      label=TEXT(ShiftedLineVelocityOVIR[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsR, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    FOR I = MIN(indexOVIRIntrinsic), MAX(indexOVIRIntrinsic) DO BEGIN
+      label=TEXT(LineVelocityOVIR[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsR, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    errorbarsB = errorplot(velocitygasOVIB, relativeflux, errorOVIB, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      YTITLE = '$Flux_{blue}$', $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    IntrinsicB = errorplot(ShiftedLineVelocityOVIB, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='red', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    ISMB = errorplot(LineVelocityOVIB, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraOVIB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='lime green', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    text=TEXT(.5, .495,'1031.912 $\AA$', /NORMAL, FONT_SIZE = 8)
+      FOR I = MIN(indexOVIBISM), MAX(indexOVIBISM) DO BEGIN
+      label=TEXT(ShiftedLineVelocityOVIB[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsb, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    FOR I = MIN(indexOVIBIntrinsic), MAX(indexOVIRIntrinsic) DO BEGIN
+      label=TEXT(LineVelocityOVIB[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsb, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    IF (rangelya[1] lt linecount) OR (rangelya[1] le wgasLYAU) THEN BEGIN
+      errorbarslya = errorplot(velocitygaslyA, relativeflux, errorlyA, $
+        XRANGE = [rangespectraOVIB], $
+        YRANGE = [-.2,1.3], $
+        YTITLE = '$Flux_\alpha$', $
+        POSITION = [.15,.76,.95,.93], $
+        /CURRENT, $
+        errorbar_capsize = 0,$
+        errorbar_color='blue', $
+        FONT_SIZE = 12, $
+        XMAJOR = -1)
+      IntrinsicLYA = errorplot(ShiftedLineVelocityLYA, Falsepoints, VerticalLines, $
+        XRANGE = [rangespectraOVIB], $
+        YRANGE = [-.2,1.3], $
+        AXIS_STYLE = 0, $
+        POSITION = [.15,.76,.95,.93], $
+        /CURRENT, $
+        errorbar_capsize = 0,$
+        errorbar_color='red', $
+        FONT_SIZE = 12, $
+        XMAJOR = 0)
+      ISMLYA = errorplot(LineVelocityLYA, Falsepoints, VerticalLines, $
+        XRANGE = [rangespectraOVIB], $
+        YRANGE = [-.2,1.3], $
+        AXIS_STYLE = 0, $
+        POSITION = [.15,.76,.95,.93], $
+        /CURRENT, $
+        errorbar_capsize = 0,$
+        errorbar_color='lime green', $
+        FONT_SIZE = 12, $
+        XMAJOR = 0)
+      text=TEXT(.5, .935,'1215.67 $\AA$', /NORMAL, FONT_SIZE = 8)
+        FOR I = MIN(indexLYAISMOVI), MAX(indexLYAISMOVI) DO BEGIN
+        label=TEXT(ShiftedLineVelocityLYA[I], $
+          .15,  $
+          LineLabel[I], $
+          /DATA, $
+          TARGET = errorbarslya, $
+          ORIENTATION = 90, $
+          FONT_SIZE = 8)
+      ENDFOR
+      FOR I = MIN(indexLYAIntrinsicOVI), MAX(indexLYAIntrinsicOVI) DO BEGIN
+        label=TEXT(LineVelocityLYA[I], $
+          .15,  $
+          LineLabel[I], $
+          /DATA, $
+          TARGET = errorbarslya, $
+          ORIENTATION = 90, $
+          FONT_SIZE = 8)
+      ENDFOR
+      IF rangelyb[0] gt 0 THEN BEGIN
+        errorbarslyb = errorplot(velocitygaslyB, relativeflux, errorlyB, $
+          XRANGE = [rangespectraOVIB], $
+          YRANGE = [-.2,1.3], $
+          YTITLE = '$Flux_\beta$', $
+          POSITION = [.15,.54,.95,.71], $
+          /CURRENT, $
+          errorbar_capsize = 0,$
+          errorbar_color='blue', $
+          FONT_SIZE = 12, $
+          XMAJOR = -1)
+        text=TEXT(.5, .715,'1025.7223 $\AA$', /NORMAL, FONT_SIZE = 8)
+        IntrinsicLYB = errorplot(ShiftedLineVelocityLYB, Falsepoints, VerticalLines, $
+          XRANGE = [rangespectraOVIB], $
+          YRANGE = [-.2,1.3], $
+          AXIS_STYLE = 0, $
+          POSITION = [.15,.54,.95,.71], $
+          /CURRENT, $
+          errorbar_capsize = 0,$
+          errorbar_color='red', $
+          FONT_SIZE = 12, $
+          XMAJOR = 0)
+        ISMLYB = errorplot(LineVelocityLYB, Falsepoints, VerticalLines, $
+          XRANGE = [rangespectraOVIB], $
+          YRANGE = [-.2,1.3], $
+          AXIS_STYLE = 0, $
+          POSITION = [.15,.54,.95,.71], $
+          /CURRENT, $
+          errorbar_capsize = 0,$
+          errorbar_color='lime green', $
+          FONT_SIZE = 12, $
+          XMAJOR = 0)
+        FOR I = MIN(indexLYBISMOVI), MAX(indexLYBISMOVI) DO BEGIN
+          label=TEXT(ShiftedLineVelocityLYB[I], $
+            .15,  $
+            LineLabel[I], $
+            /DATA, $
+            TARGET = errorbarslyb, $
+            ORIENTATION = 90, $
+            FONT_SIZE = 8)
+        ENDFOR
+        FOR I = MIN(indexLYBIntrinsicOVI), MAX(indexLYBIntrinsicOVI) DO BEGIN
+          label=TEXT(LineVelocityLYB[I], $
+            .15,  $
+            LineLabel[I], $
+            /DATA, $
+            TARGET = errorbarslyb, $
+            ORIENTATION = 90, $
+            FONT_SIZE = 8)
+        ENDFOR
+        legint=TEXT(.1,.98,"--- Intrinsic", $
+          FONT_SIZE = 8, $
+          COLOR = "red")
+        legint=TEXT(.1,.96,"--- ISM", $
+          FONT_SIZE = 8, $
+          COLOR = "lime green")
+        OVInatural.save, filename+' OVI natural plots.pdf'
+      ENDIF ELSE BEGIN
+        legint=TEXT(.1,.98,"--- Intrinsic", $
+          FONT_SIZE = 8, $
+          COLOR = "red")
+        legint=TEXT(.1,.96,"--- ISM", $
+          FONT_SIZE = 8, $
+          COLOR = "lime green")
+        OVInatural.save, filename+' OVI natural plots.pdf'
+      ENDELSE
+    ENDIF
+    OVINatural.close
+  ENDIF
+  IF (rangenvr[1] lt linecount) OR (rangenvr[1] le wgasNVBU) THEN BEGIN
+    NVnatural = WINDOW(WINDOW_TITLE = filename + ' NV Natural')
+    errorbarsR = errorplot(velocitygasNVR, relativeflux, errorNVR, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      XTITLE = 'Velocity (km/s)', $
+      YTITLE = '$Flux_{red}$', $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    IntrinsicR = errorplot(ShiftedLineVelocityNVR, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='red', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    ISMR = errorplot(LineVelocityNVR, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.1,.95,.27], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='lime green', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    text=TEXT(.5, .275,'1242.804 $\AA$', /NORMAL, FONT_SIZE = 8)
+      FOR I = MIN(indexNVRISM), MAX(indexNVRISM) DO BEGIN
+      label=TEXT(ShiftedLineVelocityNVR[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    FOR I = MIN(indexNVRIntrinsic), MAX(indexNVRIntrinsic) DO BEGIN
+      label=TEXT(LineVelocityNVR[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    errorbarsB = errorplot(velocitygasNVB, relativeflux, errorNVB, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      YTITLE = '$Flux_{blue}$', $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    text=TEXT(.5, .495,'1238.82 $\AA$', /NORMAL, FONT_SIZE = 8)
+    IntrinsicB = errorplot(ShiftedLineVelocityNVB, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='red', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    ISMB = errorplot(LineVelocityNVB, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.32,.95,.49], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='lime green', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    FOR I = MIN(indexNVBISM), MAX(indexNVBISM) DO BEGIN
+      label=TEXT(ShiftedLineVelocityNVB[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsb, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    FOR I = MIN(indexNVBIntrinsic), MAX(indexNVBIntrinsic) DO BEGIN
+      label=TEXT(LineVelocityNVB[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarsb, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    errorbarslya = errorplot(velocitygaslyA, relativeflux, errorlyA, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      YTITLE = '$Flux_\alpha$', $
+      POSITION = [.15,.76,.95,.93], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='blue', $
+      FONT_SIZE = 12, $
+      XMAJOR = -1)
+    text=TEXT(.5, .935,'1215.67 $\AA$', /NORMAL, FONT_SIZE = 8)
+    IntrinsicLYA = errorplot(ShiftedLineVelocityLYA, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.76,.95,.93], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='red', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    ISMLYA = errorplot(LineVelocityLYA, Falsepoints, VerticalLines, $
+      XRANGE = [rangespectraNVB], $
+      YRANGE = [-.2,1.3], $
+      AXIS_STYLE = 0, $
+      POSITION = [.15,.76,.95,.93], $
+      /CURRENT, $
+      errorbar_capsize = 0,$
+      errorbar_color='lime green', $
+      FONT_SIZE = 12, $
+      XMAJOR = 0)
+    FOR I = MIN(indexLYAISMNV), MAX(indexLYAISMNV) DO BEGIN
+      label=TEXT(ShiftedLineVelocityLYA[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarslya, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    FOR I = MIN(indexLYAIntrinsicNV), MAX(indexLYAIntrinsicNV) DO BEGIN
+      label=TEXT(LineVelocityLYA[I], $
+        .15,  $
+        LineLabel[I], $
+        /DATA, $
+        TARGET = errorbarslya, $
+        ORIENTATION = 90, $
+        FONT_SIZE = 8)
+    ENDFOR
+    IF rangelyb[0] gt 0 THEN BEGIN
+      errorbarslyb = errorplot(velocitygaslyB, relativeflux, errorlyB, $
+        XRANGE = [rangespectraNVB], $
+        YRANGE = [-.2,1.3], $
+        YTITLE = '$Flux_\beta$', $
+        POSITION = [.15,.54,.95,.71], $
+        /CURRENT, $
+        errorbar_capsize = 0,$
+        errorbar_color='blue', $
+        FONT_SIZE = 12, $
+        XMAJOR = -1)
+      text=TEXT(.5, .715,'1025.7223 $\AA$', /NORMAL, FONT_SIZE = 8)
+      IntrinsicLYB = errorplot(ShiftedLineVelocityLYB, Falsepoints, VerticalLines, $
+        XRANGE = [rangespectraNVB], $
+        YRANGE = [-.2,1.3], $
+        AXIS_STYLE = 0, $
+        POSITION = [.15,.54,.95,.71], $
+        /CURRENT, $
+        errorbar_capsize = 0,$
+        errorbar_color='red', $
+        FONT_SIZE = 12, $
+        XMAJOR = 0)
+      ISMLYB = errorplot(LineVelocityLYB, Falsepoints, VerticalLines, $
+        XRANGE = [rangespectraNVB], $
+        YRANGE = [-.2,1.3], $
+        AXIS_STYLE = 0, $
+        POSITION = [.15,.54,.95,.71], $
+        /CURRENT, $
+        errorbar_capsize = 0,$
+        errorbar_color='lime green', $
+        FONT_SIZE = 12, $
+        XMAJOR = 0)
+      FOR I = MIN(indexLYBISMNV), MAX(indexLYBISMNV) DO BEGIN
+        label=TEXT(ShiftedLineVelocityLYB[I], $
+          .15,  $
+          LineLabel[I], $
+          /DATA, $
+          TARGET = errorbarslyb, $
+          ORIENTATION = 90, $
+          FONT_SIZE = 8)
+      ENDFOR
+      FOR I = MIN(indexLYBIntrinsicNV), MAX(indexLYBIntrinsicNV) DO BEGIN
+        label=TEXT(LineVelocityLYB[I], $
+          .15,  $
+          LineLabel[I], $
+          /DATA, $
+          TARGET = errorbarslyb, $
+          ORIENTATION = 90, $
+          FONT_SIZE = 8)
+      ENDFOR
+      legint=TEXT(.1,.98,"--- Intrinsic", $
+        FONT_SIZE = 8, $
+        COLOR = "red")
+      legint=TEXT(.1,.96,"--- ISM", $
+        FONT_SIZE = 8, $
+        COLOR = "lime green")
+      NVnatural.save, filename+' NV natural plots.pdf'
+    ENDIF ELSE BEGIN
+      legint=TEXT(.1,.98,"--- Intrinsic", $
+        FONT_SIZE = 8, $
+        COLOR = "red")
+      legint=TEXT(.1,.96,"--- ISM", $
+        FONT_SIZE = 8, $
+        COLOR = "lime green")
+      NVnatural.save, filename+' NV natural plots.pdf'
+    ENDELSE
+    NVNatural.close
+  ENDIF
+  print, filename
+  DELVAR, velocitygasOVIR, velocitygasOVIB, relativeflux, errorOVIR, errorOVIB, $
+    ShiftedLineVelocityOVIR, rangespectraOVIB, $
+    indexOVIRISM, indexIntrinsic, LineVelocityOVIB, errorbarsb, errorbarsr, $
+    rangelyb, filename, velocitygasNVR, velocitygasNVB, $
+    errorNVR, errorNVB, ShiftedLineVelocityOVIB, LineVelocityOVIR, rangespectraNVB, $
+    errorbarslyb, LineVelocityLYB, indexLYBIntrinsicNV, indexLYBISMNV, $
+    indexLYAIntrinsicNV, indexLYAISMNV, ShiftedLineVelocityLYB,  $
+    LineVelocityLYA, indexNVISM, rangenvr, linecount, ShiftedLineVelocityNVR, $
+    LineVelocityNVR, LineVelocityNVB, indexNVRISM, indexNVRIntrinsic, ShiftedLineVelocityNVB, $
+    indexNVBISM, indexNVBIntrinsic, coveringfactorNV, errorNVCF, opticaldepthNVR, errorNVOD, $
+    errorLYA, velocitygasLYA, ShiftedLineVelocityLYA, indexOVIRIntrinsic, indexOVIBISM, $
+    indexOVIBIntrinsic, coveringfactorovi, errorovicf, opticaldepthovir, erroroviod, $
+    rangelya, indexlyaismovi, indexLYAIntrinsicOVI, velocitygaslyb, errorlyb, $
+    indexLYBISMOVI, indexlybIntrinsicOVI,wgasLyAU, wgasLyBU, wgasNVBU, wgasOVIBU
+END   
+
+
+
+PRO UVspectraplot
+
+
+
+
+
+
+  ;*****************************************
+  ;Later on we want to clearly define where absorption and emission lines show up so that we
+  ;can avoid attributing profiles to incorrect lines. It's helpful to declare them now.
+  ;*****************************************
+
+  LineLabel = $
+    ['C III $\lambda$977',$
+    'N III $\lambda$990',$
+    'Ly $\beta$1026',$
+    'O VI $\lambda$1032',$
+    'O VI $\lambda$1038',$
+    'Fe III $\lambda$1123',$
+    'Fe II $\lambda$1025',$
+    'P V $\lambda$1128',$
+    'N I $\lambda$1134.2',$
+    'N I $\lambda$1134.4',$
+    'N I $\lambda$1134.9',$
+    'Fe II $\lambda$1143',$
+    'Fe II $\lambda$1145',$
+    'P II $\lambda$1153',$
+    'N IV $\lambda$1169',$
+    'C IV $\lambda$1169',$
+    'C IV $\lambda$1169',$
+    'C III $\lambda$1175.7',$
+    'N III $\lambda$1183',$
+    'N III $\lambda$1185',$
+    'Si II $\lambda$1190',$
+    'Si II $\lambda$1193',$
+    'N I $\lambda$1199.5',$
+    'N I $\lambda$1200.2',$
+    'N I $\lambda$1200.71',$
+    'Si III $\lambda$1207',$
+    'Ly $\alpha$1216',$
+    'N V $\lambda$1239',$
+    'N V $\lambda$1243',$
+    'S II $\lambda$1251',$
+    'S II $\lambda$1254',$
+    'S II $\lambda$1260', $
+    'Si II $\lambda$1260',$
+    'C I $\lambda$1277',$
+    'C I $\lambda$1280',$
+    'O I $\lambda$1302',$
+    'Si II $\lambda$1304',$
+    'Ni II $\lambda$1317',$
+    'C I $\lambda$1329',$
+    'C II $\lambda$1335',$
+    'C II* $\lambda$1335.6',$
+    'C II* $\lambda$1335.7',$
+    'C II $\lambda$1347',$
+    'O I $\lambda$1356',$
+    'Cu II $\lambda$1359',$
+    'Ni II $\lambda$1370',$
+    'Si IV $\lambda$1394',$
+    'Sn II $\lambda$1400',$
+    'Si IV $\lambda$1403',$
+    'C IV $\lambda$1548',$
+    'C IV $\lambda$1551']
+
+    LineWavelength = $
+    [977.0201,$
+    989.799,$
+    1025.7223,$
+    1031.912,$
+    1037.613,$
+    1122.5240,$
+    1125.4477,$
+    1128.0078,$
+    1134.1653,$
+    1134.4149,$
+    1134.9803,$
+    1143.2260,$
+    1144.9379,$
+    1152.8180,$
+    1168.599,$
+    1168.873,$
+    1168.990,$
+    1175.7217,$
+    1183.030,$
+    1184.544,$
+    1190.416,$
+    1193.2890,$
+    1199.5496,$
+    1200.2233,$
+    1200.7098,$
+    1206.500,$
+    1215.67,$
+    1238.8210,$
+    1242.804,$
+    1250.578,$
+    1253.8051,$
+    1259.518,$
+    1260.4221,$
+    1277.245,$
+    1280.14,$
+    1302.1685,$
+    1304.3702,$
+    1317.21,$
+    1328.83,$
+    1334.532,$
+    1335.6627,$
+    1335.7077,$
+    1347.2396,$
+    1355.5977,$
+    1358.77,$
+    1370.132,$
+    1393.76,$
+    1400.450,$
+    1402.7729,$
+    1548.202,$
+    1550.774]
+    
+  ;*****************************************
+  ;The below are reference wavelengths that are strong and generally present
+  ;*****************************************
+
+  referencewavelengthOVIB = 1031.912d
+  referencewavelengthOVIR = 1037.613d
+  referencewavelengthNVB = 1238.82d
+  referencewavelengthNVR = 1242.804d
+  referencewavelengthLyA = 1215.67d
+  referencewavelengthLyB = 1025.7223d
+  ;*****************************************
+  ;Grabs the properties of each file
+  ;*****************************************
+
+  readcol, 'testscript', galaxyname, galaxyredshift, width0, width1, $
+    cutoffovi01loop, cutoffovi02loop, $
+    cutoffnv01loop, cutoffnv02loop, $
+     format='(A,D,D,D,D,D,D,D,D,D,D,D)'
+  
+  galaxy_num = N_ELEMENTS(galaxyname)
+  
+  FOR I = 0, galaxy_num-1 DO BEGIN
+  ;*****************************************
+  ;This establishes variables and arrays that will be used later
+  ;*****************************************
+  filename= galaxyname[I]
+  ext='.txt'
+  linecount=FILE_LINES(filename+ext)
+  c = 299792.458d
+  odtitle = '$\tau$'
+  cftitle = '$C_f$'
+  cutoffovi01=cutoffovi01loop[I]
+  cutoffovi02=cutoffovi02loop[I]
+  cutoffnv01=cutoffnv01loop[I]
+  cutoffnv02=cutoffnv02loop[I]
+  
+  
+   
+  ;*****************************************
+  ;This reads tables in ASCII format if they're in columns. Wspectext in IRAF can convert
+  ;.fits files to .txt. Whilte running the command, make sure that the Current Directory that IDL
+  ;is working in is the same as the directory where the files being operated on are located.
+  ;*****************************************
+  
+  readcol,filename+'n'+ext, wavelength, relativeflux
+  readcol,filename+'f'+ext, useless, fit
+  readcol,filename+ext, useless, useless, error
+  error = error/fit
+  
+  ;*****************************************
+  ;Sets redshift
+  ;*****************************************
+  zgalaxy = MAKE_ARRAY(linecount)
+  zgalaxy = galaxyredshift[I]
+
+  
+  ;*****************************************
+  ;This gets the wavelength of the Lymen lines with respect to our reference frame.
+  ;We then run checks on the domain of the data in order to figure out which lines are present.
+  ;*****************************************
+  
+  shiftedreferencelya = referencewavelengthlya*(1+zgalaxy)
+  shiftedreferencelyb = referencewavelengthlyb*(1+zgalaxy)
+  shiftedreferenceOVIR = referencewavelengthOVIR*(1+zgalaxy)
+  shiftedreferenceOVIB = referencewavelengthOVIB*(1+zgalaxy)
+  shiftedreferenceNVR = referencewavelengthNVR*(1+zgalaxy)
+  shiftedreferenceNVB = referencewavelengthNVB*(1+zgalaxy)
+  lyacheck1 = (shiftedreferencelya gt wavelength[0])
+  lyacheck2 = (shiftedreferencelya lt wavelength[linecount-4])
+  lybcheck1 = (shiftedreferencelyb gt wavelength[0])
+  lybcheck2 = (shiftedreferencelyb lt wavelength[linecount-4])
+  OVIcheck1 = (shiftedreferenceOVIB gt wavelength[0])
+  OVIcheck2 = (shiftedreferenceOVIR lt wavelength[linecount-4])
+  NVcheck1 = (shiftedreferenceNVB gt wavelength[0])
+  NVcheck2 = (shiftedreferenceNVR lt wavelength[linecount-4])
+
+  ;**********************************************************
+  ;------------------------NV LINES--------------------------
+  ;**********************************************************
+
+  ;*****************************************
+  ;This grabs the values within the arrays created closest to the observed absorption line wavelengths.
+  ;*****************************************
+  
+  rangecenterwavelengthNVB = VALUE_LOCATE(wavelength, shiftedreferenceNVB)
+  rangecenterwavelengthNVR = VALUE_LOCATE(wavelength, shiftedreferenceNVR)
+
+  ;*****************************************
+  ;This provides a variable that represents a domain interval that we can call throughout the program.
+  ;The domain interval is taken from the observed wavelengths around the blueward profile.
+  ;Change the variable "widthNV" until the plots are centered on the profile.
+  ;*****************************************
+  widthnv=[width0[I],width1[I]]
+  rangeNVB = [rangecenterwavelengthNVB-widthNV[0],rangecenterwavelengthNVB+widthNV[1]]
+  rangeNVR = [rangecenterwavelengthNVR - widthNV[0], rangecenterwavelengthNVR + widthNV[1]]
+
+  ;*****************************************
+  ;Assigning variables to the upper and lower bounds of the ranges just described, for legibility.
+  ;*****************************************
+  
+  wgasNVBL = rangeNVB[0]
+  wgasNVBU = rangeNVB[1]
+  wgasNVRL = rangeNVR[0]
+  wgasNVRU = rangeNVR[1]
+
+  ;*****************************************
+  ;These are calculations based on the formulae for redshift and the Doppler Effect for light.
+  ;*****************************************
+  
+  zNVR = wavelength/referencewavelengthNVR -1
+  zNVB = wavelength/referencewavelengthNVB-1
+  delzNVR = zNVR-zgalaxy
+  delzNVB = zNVB-zgalaxy
+  velocitygasNVR = c*((1 + delzNVR)^2 - 1)/((1+delzNVR)^2+1)
+  velocitygasNVB = c*((1 + delzNVB)^2 - 1)/((1+delzNVB)^2+1)
+
+  ;*****************************************
+  ;This creates variables that hold the infinum and supremum of our plots.
+  ;*****************************************
+  
+  OutsideData = 0
+  
+  IF wgasNVBU gt N_ELEMENTS(velocitygasNVB) THEN BEGIN
+    DummyValue = wgasNVBU-N_ELEMENTS(velocitygasNVB)+1
+    DummyArray = MAKE_ARRAY(DummyValue, /DOUBLE, Value = 1)
+    velocitygasNVB = [velocitygasNVB, DummyArray]
+    velocitygasNVR = [velocitygasNVR, DummyArray]
+    error = [error, DummyArray]
+    relativeflux = [relativeflux, DummyArray]
+    OutsideData = 1
+  ENDIF
+  vgasNVBL=velocitygasNVB[wgasNVBL]
+  vgasNVBU=velocitygasNVB[wgasNVBU]
+  vgasNVRL=velocitygasNVR[VALUE_LOCATE(velocitygasNVR,vgasNVBL)]
+  vgasNVRU=velocitygasNVR[VALUE_LOCATE(velocitygasNVR,vgasNVBU)]
+
+  ;*****************************************
+  ;This interpolates the errors so they can be properly aligned with our data.
+  ;*****************************************
+  
+  errorNVR = INTERPOL(error, velocitygasNVR,velocitygasNVB)
+  errorNVB = error
+
+  ;*****************************************
+  ;This interpolates the datapoints for the profile centered around the redward line to
+  ;have the same intervals as the blueward line, so that we can do accurate calculations using
+  ;both the redward and blueward lines.
+  ;*****************************************
+  
+  relativefluxNVR=INTERPOL(relativeflux, velocitygasNVR, velocitygasNVB)
+  relativefluxNVB=relativeflux
+
+
+
+
+  ;**********************************************************
+  ;------------------------OVI LINES-------------------------
+  ;**********************************************************
+  
+  ;*****************************************
+  ;This grabs the values within the arrays created closest to the observed absorption line wavelengths.
+  ;*****************************************
+  
+  rangecenterwavelengthOVIB = VALUE_LOCATE(wavelength, shiftedreferenceOVIB)
+  rangecenterwavelengthOVIR = VALUE_LOCATE(wavelength, shiftedreferenceOVIR)
+  
+  ;*****************************************
+  ;This provides a variable that represents a domain interval that we can call throughout the program.
+  ;The domain interval is taken from the observed wavelengths around the blueward profile.
+  ;Change the variable "widthOVI" until the plots are centered on the profile.
+  ;*****************************************
+  widthovi=[width0[I],width1[I]]
+  rangeOVIB = [rangecenterwavelengthOVIB - widthOVI[0],rangecenterwavelengthOVIB + widthOVI[1]]
+  rangeOVIR = [rangecenterwavelengthOVIR - widthOVI[0], rangecenterwavelengthOVIR + widthOVI[1]]
+
+  ;*****************************************
+  ;Assigning variables to the upper and lower bounds of the ranges just described, for legibility.
+  ;*****************************************
+  
+  wgasOVIBL = rangeOVIB[0]
+  wgasOVIBU = rangeOVIB[1]
+  wgasOVIRL = rangeOVIR[0]
+  wgasOVIRU = rangeOVIR[1]
+
+
+  ;*****************************************
+  ;These are calculations based on the formulae for redshift and the Doppler Effect for light.
+  ;*****************************************
+  
+  zOVIR = wavelength/referencewavelengthOVIR - 1
+  zOVIB = wavelength/referencewavelengthOVIB - 1
+  delzOVIR = zOVIR-zgalaxy
+  delzOVIB = zOVIB-zgalaxy
+  velocitygasOVIR = c*((delzOVIR+1)^2 - 1.0)/(1.0+(delzOVIR+1)^2)
+  velocitygasOVIB = c*((delzOVIB+1)^2 - 1.0)/(1.0+(delzOVIB+1)^2)
+
+  ;*****************************************
+  ;This creates variables that hold the infinum and supremum of our plots.
+  ;*****************************************
+  
+  IF OutsideData eq 1 THEN BEGIN
+    velocitygasOVIB = [velocitygasOVIB, DummyArray]
+    velocitygasOVIR = [velocitygasOVIR, DummyArray]
+  ENDIF
+  vgasOVIL=velocitygasOVIB[wgasOVIBL]
+  vgasOVIU=velocitygasOVIB[wgasOVIBU]
+  vgasOVIL=velocitygasOVIR[VALUE_LOCATE(velocitygasOVIR,wgasOVIBL)]
+  vgasOVIU=velocitygasOVIR[VALUE_LOCATE(velocitygasOVIR,wgasOVIBU)]
+
+  ;*****************************************
+  ;This interpolates the errors so they can be properly aligned with our data.
+  ;*****************************************
+  
+  errorOVIR = INTERPOL(error, velocitygasOVIR,velocitygasOVIB)
+  errorOVIB = error
+
+  ;*****************************************
+  ;This interpolates the datapoints for the profile centered around the redward line to
+  ;have the same intervals as the blueward line, so that we can do accurate calculations using
+  ;both the redward and blueward lines.
+  ;*****************************************
+  
+  relativefluxOVIR=INTERPOL(relativeflux, velocitygasOVIR, velocitygasOVIB)
+  relativefluxOVIB=relativeflux
+
+  ;**********************************************************
+  ;------------------------Lymen LINES-------------------------
+  ;**********************************************************
+  
+  ;*****************************************
+  ;This grabs the values within the arrays created closest to the observed absorption line wavelengths.
+  ;*****************************************
+  rangecenterwavelengthLyB = VALUE_LOCATE(wavelength, shiftedreferenceLyB)
+  rangecenterwavelengthLyA = VALUE_LOCATE(wavelength, shiftedreferenceLyA)
+  
+  ;*****************************************
+  ;This provides a variable that represents a domain interval that we can call throughout the program.
+  ;The domain interval is taken from the observed wavelengths around the blueward profile.
+  ;Change the variables "widthLyA" and "widthLyB" until the plots are centered on the profile.
+  ;*****************************************
+  
+  widthLyA = widthnv
+  widthLyB = widthnv
+  rangeLyB = [rangecenterwavelengthLyB - widthLyB[0], rangecenterwavelengthLyB + widthLyB[1]]
+  rangeLyA = [rangecenterwavelengthLyA - widthLyA[0], rangecenterwavelengthLyA + widthLyA[1]]
+
+  ;*****************************************
+  ;Assigning variables to the upper and lower bounds of the ranges just described, for legibility.
+  ;*****************************************
+  
+  wgasLyBL = rangeLyB[0]
+  wgasLyBU = rangeLyB[1]
+  wgasLyAL = rangeLyA[0]
+  wgasLyAU = rangeLyA[1]
+
+  ;*****************************************
+  ;Creating arrays that represent the portion of the data we are concerned about.
+  ;*****************************************
+
+  IF wgasLyAU lt (linecount-34) THEN BEGIN
+    wgasLyA = wavelength[wgasLyAL:wgasLyAU]
+  ENDIF
+  IF wgasLyBL gt 0 THEN BEGIN
+    wgasLyB = wavelength[wgasLyBL:wgasLyBU]
+  ENDIF
+
+  ;*****************************************
+  ;We use the doppler shift and redshift formulae to convert to velocity space.
+  ;*****************************************
+  
+  zLyB = wavelength/referencewavelengthLyB - 1
+  zLyA = wavelength/referencewavelengthLyA - 1
+  delzLyB = zLyB-zgalaxy
+  delzLyA = zLyA-zgalaxy
+  velocitygasLyB = c*((1 + delzLyB)^2 - 1)/((1+delzLyB)^2+1)
+  velocitygasLyA = c*((1 + delzLyA)^2 - 1)/((1+delzLyA)^2+1)
+  
+  IF OutsideData eq 1 THEN BEGIN
+    velocitygasLyB = [velocitygasLyB, DummyArray]
+    velocitygasLyA = [velocitygasLyA, DummyArray]
+  ENDIF
+  ;*****************************************
+  ;We allso want to mirror the calculations done earlier on these wavelengths so that they would match.
+  ;We will have one set, which is the wavelengths as shown above, while another will be shifted.
+  ;This ensures that we will have wavelengths with respect to our perspective as well as with respect
+  ;to the target galaxy. Then we perform a transformation into velocity spaceon both sets.
+  ;*****************************************
+  
+  ShiftedLineWavelength = LineWavelength*(1 + zgalaxy)
+  zlLyB = LineWavelength/referencewavelengthlyb -1
+  zlOVIB = Linewavelength/referencewavelengthovib -1
+  zlOVIR = LineWavelength/referencewavelengthOVIR -1
+  zlLYA = LineWavelength/referencewavelengthlya -1
+  zlNVB = LineWavelength/referencewavelengthnvb -1
+  zlNVR = LineWavelength/referencewavelengthnvr -1
+  zlslyb = shiftedlinewavelength/referencewavelengthlyb -1
+  zlsovib = shiftedlinewavelength/referencewavelengthovib -1
+  zlsovir = shiftedlinewavelength/referencewavelengthovir -1
+  zlslya = shiftedlinewavelength/referencewavelengthlya -1
+  zlsnvb = shiftedlinewavelength/referencewavelengthnvb -1
+  zlsnvr = shiftedlinewavelength/referencewavelengthnvr -1
+  delzlLyB = zlLYB-zgalaxy
+  delzlOVIB = zlOVIB-zgalaxy
+  delzlOVIR = zlOVIR-zgalaxy
+  delzlLYA = zlLYA-zgalaxy
+  delzlNVB = zlNVB-zgalaxy
+  delzlNVR = zlNVR-zgalaxy
+  delzlslyb = zlsLYB-zgalaxy
+  delzlsovib = zlsOVIB-zgalaxy
+  delzlsovir = zlsOVIR-zgalaxy
+  delzlslya = zlsLYA-zgalaxy
+  delzlsnvb = zlsNVB-zgalaxy
+  delzlsnvr = zlsNVR-zgalaxy
+  LineVelocityLyB = c*((delzlLyB +1.0)^2 -1.0)/((delzlLyB+1.0)^2+1.0)
+  LineVelocityOVIB = c*((delzlOVIB + 1.0)^2 - 1.0)/((delzlOVIB+1.0)^2+1.0)
+  LineVelocityOVIR = c*((delzlOVIR + 1.0)^2-1.0)/((delzlOVIR + 1.0)^2+1.0)
+  LineVelocityLyA = c*((delzlLyA + 1.0)^2 - 1.0)/((delzlLyA + 1.0)^2+1.0)
+  LineVelocityNVB = c*((delzlNVB + 1.0)^2 - 1.0)/((delzlNVB + 1.0)^2+1.0)
+  LineVelocityNVR = c*((delzlNVR + 1.0)^2 - 1.0)/((delzlNVR + 1.0)^2+1.0)
+  ShiftedLineVelocityLyB = c*((delzlsLyB+1.0)^2-1.0)/((delzlsLyB+1.0)^2+1.0)
+  ShiftedLineVelocityOVIB = c*((delzlsOVIB + 1.0)^2 - 1.0)/((delzlsOVIB+1.0)^2+1.0)
+  ShiftedLineVelocityOVIR = c*((delzlsOVIR + 1.0)^2-1.0)/((delzlsOVIR + 1.0)^2+1.0)
+  ShiftedLineVelocityLyA = c*((delzlsLyA + 1.0)^2 - 1.0)/((delzlsLyA + 1.0)^2+1.0)
+  ShiftedLineVelocityNVB = c*((delzlsNVB + 1.0)^2 - 1.0)/((delzlsNVB + 1.0)^2+1.0)
+  ShiftedLineVelocityNVR = c*((delzlsNVR + 1.0)^2 - 1.0)/((delzlsNVR + 1.0)^2+1.0)
+
+  ;*****************************************
+  ;This interpolates the datapoints for the profile centered around the redward line to
+  ;have the same intervals as the blueward line, so that we can do accurate calculations using
+  ;both the redward and blueward lines.
+  ;*****************************************
+  
+  IF OVIcheck1 AND OVIcheck2 THEN BEGIN
+    IF LyBcheck1 AND LyBcheck2 THEN BEGIN
+      relativefluxLyB = INTERPOL(relativeflux, velocitygasLyB, velocitygasOVIB)
+    ENDIF ELSE BEGIN
+      IF LyAcheck1 AND LyAcheck2 THEN BEGIN
+        relativefluxLyA = INTERPOL(relativeflux, velocitygasLyA, velocitygasOVIB)
+      ENDIF
+    ENDELSE
+    IF LyAcheck1 AND LyAcheck2 THEN BEGIN
+      relativefluxLyA = INTERPOL(relativeflux, velocitygasLyA, velocitygasNVB)
+    ENDIF
+  ENDIF ELSE BEGIN
+    IF LyAcheck1 AND LyAcheck2 THEN BEGIN
+      relativefluxLyA = INTERPOL(relativeflux, velocitygasLyA, velocitygasNVB)
+    ENDIF 
+  ENDELSE
+
+
+  ;*****************************************
+  ;This interpolates the errors so they can be properly aligned with our data.
+  ;*****************************************
+  
+  IF OVIcheck1 AND OVIcheck2 THEN BEGIN
+    IF LyBcheck1 AND LyBcheck2 THEN BEGIN
+      errorLyB = INTERPOL(error, velocitygasLyB, velocitygasOVIB)
+    ENDIF ELSE BEGIN
+      IF LyAcheck1 AND LyAcheck2 THEN BEGIN
+        errorLyA = INTERPOL(error, velocitygasLyA, velocitygasOVIB)
+      ENDIF
+    ENDELSE
+    IF LyAcheck1 AND LyAcheck2 THEN BEGIN
+      errorLyA = INTERPOL(error, velocitygasLyA, velocitygasNVB)
+    ENDIF ELSE BEGIN
+      errorLyA = MAKE_ARRAY(1, N_ELEMENTS(velocitygasLyA), /DOUBLE, VALUE = 0)
+    ENDELSE
+  ENDIF ELSE BEGIN
+    IF LyAcheck1 AND LyAcheck2 THEN BEGIN
+      errorLyA = INTERPOL(error, velocitygasLyA, velocitygasNVB)
+    ENDIF ELSE BEGIN
+      errorLyA = MAKE_ARRAY(1, N_ELEMENTS(velocitygasLyA), /DOUBLE, VALUE = 0)
+    ENDELSE
+  ENDELSE
+
+  ;*****************************************
+  ;This sets the variable "datapoints" equivalent to the amount of datapoints within the range we desire.
+  ;*****************************************
+  
+  IF LyBcheck1 AND LyBcheck2 THEN BEGIN
+    datapoints = widthLyB*2
+  ENDIF ELSE BEGIN
+    IF LyAcheck1 AND LyAcheck2 THEN BEGIN
+      datapoints = widthLyA*2
+    ENDIF ELSE BEGIN
+      IF OVIcheck1 AND OVIcheck2 THEN BEGIN
+        datapoints = widthOVI*2
+      ENDIF ELSE BEGIN
+        IF NVcheck1 AND NVcheck2 THEN BEGIN
+          datapoints = widthNV*2
+        ENDIF ELSE BEGIN
+          print, "Well damn, now what?"
+        ENDELSE
+      ENDELSE
+    ENDELSE
+  ENDELSE
+
+  ;*****************************************
+  ;We create a range for our plots using the upper and lower limits previously defined.
+  ;*****************************************
+  
+  rangespectraOVIB=[velocitygasOVIB[wgasOVIBL],velocitygasOVIB[wgasOVIBU]]
+  rangespectraNVB=[velocitygasNVB[wgasNVBL],velocitygasNVB[wgasNVBU]]
+
+  ;*****************************************
+  ;This initializes arrays for usage later.
+  ;*****************************************
+  
+;  coveringfactorNV = MAKE_ARRAY(1,linecount-3,/float,1)
+;  coveringfactorOVI = MAKE_ARRAY(1,linecount-3,/float,1)
+;  opticaldepthOVIR = MAKE_ARRAY(1,linecount-3,/float,1)
+;  opticaldepthOVIB = MAKE_ARRAY(1,linecount-3,/float,1)
+;  opticaldepthNVR = MAKE_ARRAY(1,linecount-3,/float,1)
+;  opticaldepthNVB = MAKE_ARRAY(1,linecount-3,/float,1)
+;  errorNVCF = MAKE_ARRAY(1,linecount-3, /double, 1)
+;  errorOVICF = MAKE_ARRAY(1,linecount-3, /double, 1)
+;  errorNVOD = MAKE_ARRAY(1,linecount-3, /double, 1)
+;  errorOVIOD = MAKE_ARRAY(1,linecount-3, /double, 1)
+
+
+
+  ;*****************************************
+  ;Using equations taken from Hamann et al. 1997, we calculate the covering factor for both OVI and NV.
+  ;*****************************************
+  
+;  FOR I = 0.0, linecount-4 DO BEGIN
+;    CASE 1 OF
+;      (relativefluxNVR[I]^2 gt relativefluxNVB[I]): coveringfactorNV[I] = 1.0d
+;      (relativefluxNVB[I] gt relativefluxNVR[I]): coveringfactorNV[I] = 1.0d - relativefluxNVR[I]
+;      (relativefluxNVB[I] lt relativefluxNVR[I]) AND ((relativefluxNVR[I])^2 le relativefluxNVB[I]): BEGIN
+;        coveringfactorNV[I] = (relativefluxNVR[I]^2 - 2*relativefluxNVR[I] + 1.0)/(relativefluxNVB[I] - 2*relativefluxNVR[I] + 1.0)
+;      END
+;    ENDCASE
+;  ENDFOR
+;
+;  FOR I = 0.0, linecount-4 DO BEGIN
+;    CASE 1 OF
+;      (relativefluxOVIR[I]^2 gt relativefluxOVIB[I]): coveringfactorOVI[I] = 1.0d
+;      (relativefluxOVIB[I] gt relativefluxOVIR[I]): coveringfactorOVI[I] = 1.0d - relativefluxOVIR[I]
+;      (relativefluxOVIB[I] lt relativefluxOVIR[I]) AND ((relativefluxOVIR[I])^2 le relativefluxOVIB[I]): BEGIN
+;        coveringfactorOVI[I] = (relativefluxOVIR[I]^2 - 2*relativefluxOVIR[I] + 1.0)/(relativefluxOVIB[I] - 2*relativefluxOVIR[I] + 1.0)
+;      END
+;    ENDCASE
+;  ENDFOR
+
+  coveringfactorNV=MAKE_ARRAY(1, linecount-3, /double)
+  coveringfactorOVI=MAKE_ARRAY(1, linecount-3, /double)
+  opticaldepthOVIR=MAKE_ARRAY(1, linecount-3, /double)
+  opticaldepthNVR=MAKE_ARRAY(1, linecount-3, /double)
+  errorNVCF=MAKE_ARRAY(1, linecount-3, /double)
+  errorOVICF=MAKE_ARRAY(1, linecount-3, /double)
+  errorOVIOD=MAKE_ARRAY(1, linecount-3, /double)
+  errorNVOD=MAKE_ARRAY(1, linecount-3, /double)
+  
+  FOR J = 0, linecount-4 DO BEGIN
+    IF (relativefluxNVR[J]^2 gt relativefluxNVB[J]) THEN BEGIN
+      coveringfactorNV[J] = 1.0d
+    ENDIF ELSE BEGIN
+      IF (relativefluxNVB[J] gt relativefluxNVR[J]) THEN BEGIN
+        coveringfactorNV[J] = 1.0d - relativefluxNVR[J]
+      ENDIF ELSE BEGIN
+        IF (relativefluxNVB[J] lt relativefluxNVR[J]) AND ((relativefluxNVR[J])^2 le relativefluxNVB[J]) THEN BEGIN
+          coveringfactorNV[J] = (relativefluxNVR[J]^2 - 2*relativefluxNVR[J] + 1.0)/(relativefluxNVB[J] - 2*relativefluxNVR[J] + 1.0)
+        ENDIF
+      ENDELSE
+    ENDELSE
+  ENDFOR
+  
+  FOR J = 0, linecount-4 DO BEGIN
+    IF (relativefluxOVIR[J]^2 gt relativefluxOVIB[J]) THEN BEGIN
+      coveringfactorOVI[J] = 1.0d
+    ENDIF ELSE BEGIN
+      IF (relativefluxOVIB[J] gt relativefluxOVIR[J]) THEN BEGIN
+        coveringfactorOVI[J] = 1.0d - relativefluxOVIR[J]
+      ENDIF ELSE BEGIN
+        IF (relativefluxOVIB[J] lt relativefluxOVIR[J]) AND ((relativefluxOVIR[J])^2 le relativefluxOVIB[J]) THEN BEGIN
+          coveringfactorOVI[J] = (relativefluxOVIR[J]^2 - 2*relativefluxOVIR[J] + 1.0)/(relativefluxOVIB[J] - 2*relativefluxOVIR[J] + 1.0)
+        ENDIF
+      ENDELSE
+    ENDELSE
+  ENDFOR
+  
+  ;*****************************************
+  ; This removes negative values for covering factor that arise from relative flux values for
+  ; the redward and blueward lines over unity.
+  ;*****************************************
+  
+  FOR J = 0.0, linecount-4 DO BEGIN
+    IF coveringfactorNV[J] lt 0.0 THEN coveringfactorNV[J] = 0.0d
+    IF coveringfactorOVI[J] lt 0.0 THEN coveringfactorOVI[J] = 0.0d
+  ENDFOR
+  
+  ;*****************************************
+  ; This plots optical depth and sets optical depth to a plottable level when the lines are optically thick.
+  ;*****************************************
+  
+  FOR J = 0.0, linecount-4 DO BEGIN
+    IF (relativefluxOVIB[J] gt relativefluxOVIR[J]) THEN BEGIN
+      opticaldepthOVIR[J] = 10.0
+    ENDIF ELSE BEGIN
+      opticaldepthOVIR[J] = ALOG(coveringfactorOVI[J]/(coveringfactorOVI[J] + relativefluxOVIR[J] - 1.0))
+    ENDELSE
+  ENDFOR
+  FOR J = 0.0, linecount-4 DO BEGIN
+    IF (relativefluxNVB[J] gt relativefluxNVR[J]) THEN BEGIN
+      opticaldepthNVR[J] = 10.0
+    ENDIF ELSE BEGIN
+      opticaldepthNVR[J] = ALOG(coveringfactorNV[J]/(coveringfactorNV[J] + relativefluxNVR[J] - 1.0))
+    ENDELSE
+  ENDFOR
+  
+  ;*****************************************
+  ; This runs calculations for the error in covering factor for both NV and OVI lines.
+  ;*****************************************
+  
+;  FOR I = 0.0, linecount-4 DO BEGIN
+;    CASE 1 OF
+;      (relativefluxOVIR[I]^2 gt relativefluxOVIB[I]): errorOVICF[I] = 0.0d
+;      (relativefluxOVIB[I] gt relativefluxOVIR[I]): errorOVICF[I] = -1.0d*errorOVIR[I]
+;      (relativefluxOVIB[I] lt relativefluxOVIR[I]) AND ((relativefluxOVIR[I])^2 le relativefluxOVIB[I]): BEGIN
+;        errorOVICF[I]= SQRT((((relativefluxOVIB[I]-2*relativefluxOVIR[I]+1)*(2*relativefluxOVIR[I]-2.0)-(relativefluxOVIR[I]^2-2*relativefluxOVIR[I]+1.0)*(-2))/(relativefluxOVIB[I]-2*relativefluxOVIR[I]+1.0)^2*errorOVIR[I])^2+((-1.0)*(relativefluxOVIR[I]^2-2*relativefluxOVIR[I]+1.0)/(relativefluxOVIB[I]-2*relativefluxOVIR[I]+1.0)^2*errorOVIB[I])^2)
+;      END
+;    ENDCASE
+;  ENDFOR
+;  FOR I = 0.0, linecount-4 DO BEGIN
+;    CASE 1 OF
+;      (relativefluxNVR[I]^2 gt relativefluxNVB[I]): errorNVCF[I] = 0.0d
+;      (relativefluxNVB[I] gt relativefluxNVR[I]): errorNVCF[I] = -1.0d*errorNVR[I]
+;      (relativefluxNVB[I] lt relativefluxNVR[I]) AND ((relativefluxNVR[I])^2 le relativefluxNVB[I]): BEGIN
+;        errorNVCF[I]= SQRT((((relativefluxNVB[I]-2*relativefluxNVR[I]+1)*(2*relativefluxNVR[I]-2.0)-(relativefluxNVR[I]^2-2*relativefluxNVR[I]+1.0)*(-2))/(relativefluxNVB[I]-2*relativefluxNVR[I]+1.0)^2*errorNVR[I])^2+((-1.0)*(relativefluxNVR[I]^2-2*relativefluxNVR[I]+1.0)/(relativefluxNVB[I]-2*relativefluxNVR[I]+1.0)^2*errorNVB[I])^2)
+;      END
+;    ENDCASE
+;  ENDFOR
+
+
+  
+  FOR J = 0, linecount-4 DO BEGIN
+    IF (relativefluxNVR[J]^2 gt relativefluxNVB[J]) THEN BEGIN
+      errorNVCF[J] = 0.0d
+    ENDIF ELSE BEGIN
+      IF (relativefluxNVB[J] gt relativefluxNVR[J]) THEN BEGIN
+        errorNVCF[J] = -1.0d*errorNVR[J]
+      ENDIF ELSE BEGIN
+        IF (relativefluxNVB[J] lt relativefluxNVR[J]) AND ((relativefluxNVR[J])^2 le relativefluxNVB[J]) THEN BEGIN
+          errorNVCF[J]= SQRT((((relativefluxNVB[J]-2*relativefluxNVR[J]+1)*(2*relativefluxNVR[J]-2.0)-(relativefluxNVR[J]^2-2*relativefluxNVR[J]+1.0)*(-2))/(relativefluxNVB[J]-2*relativefluxNVR[J]+1.0)^2*errorNVR[J])^2+((-1.0)*(relativefluxNVR[J]^2-2*relativefluxNVR[J]+1.0)/(relativefluxNVB[J]-2*relativefluxNVR[J]+1.0)^2*errorNVB[J])^2)
+        ENDIF
+      ENDELSE
+    ENDELSE
+  ENDFOR  
+
+  FOR J = 0, linecount-4 DO BEGIN
+    IF (relativefluxOVIR[J]^2 gt relativefluxOVIB[J]) THEN BEGIN
+      errorOVICF[J] = 0.0d
+    ENDIF ELSE BEGIN
+      IF (relativefluxOVIB[I] gt relativefluxOVIR[J]) THEN BEGIN
+        errorOVICF[J] = -1.0d*errorOVIR[J]
+      ENDIF ELSE BEGIN
+        IF (relativefluxOVIB[J] lt relativefluxOVIR[J]) AND ((relativefluxOVIR[J])^2 le relativefluxOVIB[J]) THEN BEGIN
+          errorOVICF[J]= SQRT((((relativefluxOVIB[J]-2*relativefluxOVIR[J]+1)*(2*relativefluxOVIR[J]-2.0)-(relativefluxOVIR[J]^2-2*relativefluxOVIR[J]+1.0)*(-2))/(relativefluxOVIB[J]-2*relativefluxOVIR[J]+1.0)^2*errorOVIR[J])^2+((-1.0)*(relativefluxOVIR[J]^2-2*relativefluxOVIR[J]+1.0)/(relativefluxOVIB[J]-2*relativefluxOVIR[J]+1.0)^2*errorOVIB[J])^2)
+        ENDIF
+      ENDELSE
+    ENDELSE
+  ENDFOR  
+
+  ;*****************************************
+  ;This runs calculations for the error in optical depth.
+  ;*****************************************
+
+  FOR J = 0.0, linecount-4 DO BEGIN
+    errorNVOD[J] = SQRT(((1.0/(coveringfactorNV[J]+relativefluxNVR[J]-1))*errorNVR[J])^2+((1.0/coveringfactorNV[J]- 1.0/(coveringfactorNV[J]+relativefluxNVR[J]-1))*errorNVCF[J])^2)
+  ENDFOR
+  FOR J = 0.0, linecount-4 DO BEGIN
+    errorOVIOD[J] = SQRT(((1.0/(coveringfactorOVI[J]+relativefluxOVIR[J]-1))*errorOVIR[J])^2+((1.0/coveringfactorOVI[J]- 1.0/(coveringfactorOVI[J]+relativefluxOVIR[J]-1))*errorOVICF[J])^2)
+  ENDFOR
+  
+  ;*****************************************
+  ;This removes everything not within the cutoff ranges defined at the procedure's initialization.
+  ;*****************************************
+  
+    
+  FOR J = 0, linecount-4 DO BEGIN
+    IF (velocitygasOVIB[J] le cutoffovi01) OR (velocitygasOVIB[J] ge cutoffovi02) THEN BEGIN
+      opticaldepthOVIR[J] = 10
+      coveringfactorOVI[J] = -10
+      errorOVICF[J] = 0
+      errorOVIOD[J] = 0
+    ENDIF
+  ENDFOR
+
+  FOR J = 0, linecount-4 DO BEGIN
+    IF (velocitygasNVB[J] le cutoffovi01) OR (velocitygasNVB[J] ge cutoffovi02) THEN BEGIN
+      opticaldepthNVR[J] = 10
+      coveringfactorNV[J] = -10
+      errorNVCF[J] = 0
+      errorNVOD[J] = 0
+    ENDIF
+  ENDFOR
+  
+
+  ;*****************************************
+  ;This calculates the logarithmitc error in optical depth for both the positive and negative bars, and constructs a
+  ;2-dimensional array from them.
+  ;*****************************************
+  
+  errorNVODP = ALOG10(opticaldepthNVR+errorNVOD)-ALOG10(opticaldepthNVR)
+  errorNVODN = ALOG10(opticaldepthNVR)-ALOG10(opticaldepthNVR-errorNVOD)
+  errorOVIODP = ALOG10(opticaldepthOVIR+errorOVIOD)-ALOG10(opticaldepthOVIR)
+  errorOVIODN = ALOG10(opticaldepthOVIR)-ALOG10(opticaldepthOVIR-errorOVIOD)
+  errorNVOD = [errorNVODN,errorNVODP]
+  errorOVIOD = [errorOVIODN,errorOVIODP]
+  
+  ;*****************************************
+  ;This creates indices for which the ISM and Intrinsic lines appear within the plot domain. Note that, since
+  ;rangespectraNVB is not the same size as rangespectraOVIB, all indexLYA and indexLYB will require definitions with
+  ;respect to NV and OVI.
+  ;
+  ;IN THE PROCESS OF MAKING THIS PROCEDURE, MISTAKES WERE MADE.
+  ;For the plotting procedure UVSpectraPlot, index*ISM is used to represent index*Intrinsic and vice versa.
+  ;The switch does not affect the procedure at all, so it has been left in the code until it can be rectified.
+  ;*****************************************
+
+  indexNVRISM = WHERE(ShiftedLineVelocityNVR lt rangespectraNVB[1] AND ShiftedLineVelocityNVR gt rangespectraNVB[0])
+  indexNVRIntrinsic = WHERE(LineVelocityNVR lt rangespectraNVB[1] AND LineVelocityNVR gt rangespectraNVB[0])
+  indexNVBISM = WHERE(ShiftedLineVelocityNVB lt rangespectraNVB[1] AND ShiftedLineVelocityNVB gt rangespectraNVB[0])
+  indexNVBIntrinsic = WHERE(LineVelocityNVB lt rangespectraNVB[1] AND LineVelocityNVB gt rangespectraNVB[0])
+  indexOVIRISM = WHERE(ShiftedLineVelocityOVIR lt rangespectraOVIB[1] AND ShiftedLineVelocityOVIR gt rangespectraOVIB[0])
+  indexOVIRIntrinsic = WHERE(LineVelocityOVIR lt rangespectraOVIB[1]AND LineVelocityOVIR gt rangespectraOVIB[0])
+  indexOVIBISM = WHERE(ShiftedLineVelocityOVIB lt rangespectraOVIB[1] AND ShiftedLineVelocityOVIB gt rangespectraOVIB[0])
+  indexOVIBIntrinsic = WHERE(LineVelocityOVIB lt rangespectraOVIB[1] AND LineVelocityOVIB gt rangespectraOVIB[0])
+  indexLYAISMNV = WHERE(ShiftedLineVelocityLYA lt rangespectraNVB[1] AND ShiftedLineVelocityLYA gt rangespectraNVB[0])
+  indexLYAIntrinsicNV = WHERE(LineVelocityLYA lt rangespectraNVB[1] AND LineVelocityLYA gt rangespectraNVB[0])
+  indexLYAISMOVI = WHERE(ShiftedLineVelocityLYA lt rangespectraOVIB[1] AND ShiftedLineVelocityLYA gt rangespectraOVIB[0])
+  indexLYAIntrinsicOVI = WHERE(LineVelocityLYA lt rangespectraOVIB[1] AND LineVelocityLYA gt rangespectraOVIB[0])
+  indexLYBISMOVI = WHERE(ShiftedLineVelocityLYB lt rangespectraOVIB[1] AND ShiftedLineVelocityLYB gt rangespectraOVIB[0])
+  indexLYBIntrinsicOVI = WHERE(LineVelocityLYB lt rangespectraOVIB[1] AND LineVelocityLYB gt rangespectraOVIB[0])
+  indexLYBISMNV = WHERE(ShiftedLineVelocityLYB lt rangespectraNVB[1] AND ShiftedLineVelocityLYB gt rangespectraNVB[0])
+  indexLYBIntrinsicNV = WHERE(LineVelocityLYB lt rangespectraNVB[1] AND LineVelocityLYB gt rangespectraNVB[0])
+
+  ;*****************************************
+  ;For the original project this code was created for, the error bars on the transformed spectrum
+  ;only provided clutter and not much insight, so we remove them by setting error to zero.
+  ;Commenting the following section out will restore errorbars.
+  ;*****************************************
+  
+  FOR J = 0, N_ELEMENTS(errorNVR)-1 DO BEGIN
+    errorNVR[J] = 0
+    errorNVB[J] = 0
+  ENDFOR
+  FOR J = 0, N_ELEMENTS(errorlya)-1 DO BEGIN
+    errorlya[J] = 0
+  ENDFOR
+  FOR J = 0, N_ELEMENTS(errorlyb)-1 DO BEGIN
+    errorlyb[J] = 0
+  ENDFOR
+  FOR J = 0, N_ELEMENTS(errorOVIR)-1 DO BEGIN
+    errorOVIR[J] = 0
+    errorOVIB[J] = 0
+  ENDFOR
+ 
+
+  ;*****************************************
+  ;This produces 2 dummy arrays that matches the size of our known wavelength values. Falsepoints will a line at the continuum,
+  ;and VerticalLines will create large error bars that will serve as its namesake.
+  ;*****************************************
+  
+  VerticalLines = MAKE_ARRAY(1, N_ELEMENTS(ShiftedLineVelocityNVR),/double)
+  Falsepoints = MAKE_ARRAY(1, N_ELEMENTS(ShiftedLineVelocityNVR),/double)
+  
+  FOR J = 0, N_ELEMENTS(ShiftedLineVelocityNVR)-1 DO BEGIN
+    VerticalLines[J] = 2
+    Falsepoints[J] = 1
+  ENDFOR
+  
+  print, uvplotfunction(velocitygasOVIR, velocitygasOVIB, relativeflux, errorOVIR, errorOVIB, $
+    ShiftedLineVelocityOVIR, Falsepoints, VerticalLines, rangespectraOVIB, $
+    indexOVIRISM, indexIntrinsic, LineVelocityOVIB, errorbarsb, errorbarsr, $
+    rangelyb, filename, LineLabel, velocitygasNVR, velocitygasNVB, $
+    errorNVR, errorNVB, ShiftedLineVelocityOVIB, LineVelocityOVIR, rangespectraNVB, $
+    errorbarslyb, LineVelocityLYB, indexLYBIntrinsicNV, indexLYBISMNV, $
+    indexLYAIntrinsicNV, indexLYAISMNV, ShiftedLineVelocityLYB,  $
+    LineVelocityLYA, indexNVISM, rangenvr, linecount, ShiftedLineVelocityNVR, $
+    LineVelocityNVR, LineVelocityNVB, indexNVRISM, indexNVRIntrinsic, ShiftedLineVelocityNVB, $
+    indexNVBISM, indexNVBIntrinsic, coveringfactorNV, errorNVCF, opticaldepthNVR, errorNVOD,$
+    errorlya, velocitygaslya, ShiftedLineVelocityLYA, indexOVIRIntrinsic, indexOVIBISM, $
+    indexOVIBIntrinsic, coveringfactorovi, errorovicf, opticaldepthovir, erroroviod, $
+    rangelya, indexlyaismovi, indexLYAIntrinsicOVI, velocitygaslyb, errorlyb, $
+    indexLYBISMOVI, indexlybIntrinsicOVI, odtitle, cftitle, wgasLyAU, wgasLyBU, wgasNVBU, wgasOVIBU)
+
+  
+
+  ENDFOR
+END
